@@ -14,13 +14,6 @@ RUN mkdir -p /opt/sonarqube/conf && \
 # Switch back to sonarqube user
 USER sonarqube
 
-# Copy custom configuration
-COPY --chown=sonarqube:sonarqube sonar.properties /opt/sonarqube/conf/sonar.properties
-
-# Set JVM options for production
-ENV SONAR_JAVA_PATH="/opt/java/openjdk/bin/java"
-ENV SQ_JAVA_OPTS="-Xmx2g -Xms1g -XX:+UseG1GC -XX:+UseContainerSupport"
-
 # Configure SonarQube
 ENV SONAR_WEB_HOST="0.0.0.0"
 ENV SONAR_WEB_PORT="9000"
@@ -35,5 +28,3 @@ EXPOSE 9000
 
 # Volume for data persistence
 VOLUME ["/opt/sonarqube/data", "/opt/sonarqube/logs", "/opt/sonarqube/extensions"]
-
-# Use default entrypoint from base image

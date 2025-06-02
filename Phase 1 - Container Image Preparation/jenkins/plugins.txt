@@ -1,7 +1,6 @@
 # Jenkins Essential Plugins List
 
 # Build Tools
-ant:latest
 gradle:latest
 maven-plugin:latest
 
@@ -14,58 +13,3 @@ bitbucket:latest
 # Pipeline
 workflow-aggregator:latest
 pipeline-stage-view:latest
-pipeline-github-lib:latest
-pipeline-build-step:latest
-pipeline-input-step:latest
-
-# Build Environment
-build-timeout:latest
-timestamper:latest
-ws-cleanup:latest
-# environment-injector:latest  # REMOVED - causing 404 errors
-
-# Authentication & Authorization
-matrix-auth:latest
-ldap:latest
-active-directory:latest
-role-strategy:latest
-
-# Notifications
-email-ext:latest
-mailer:latest
-slack:latest
-
-# Testing & Quality
-junit:latest
-jacoco:latest
-sonar:latest
-performance:latest
-
-# Deployment
-deploy:latest
-ssh-slaves:latest
-ssh-agent:latest
-publish-over-ssh:latest
-
-# Cloud & Container
-docker-plugin:latest
-docker-workflow:latest
-kubernetes:latest
-azure-container-agents:latest
-
-# Monitoring & Logging
-monitoring:latest
-log-parser:latest
-build-monitor-plugin:latest
-
-# Utilities
-credentials-binding:latest
-parameterized-trigger:latest
-copyartifact:latest
-build-name-setter:latest
-description-setter:latest
-
-# Security
-credentials:latest
-plain-credentials:latest
-ssh-credentials:latest

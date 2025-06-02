@@ -11,13 +11,6 @@ RUN mkdir -p /nexus-data/etc && \
 # Switch back to nexus user
 USER nexus
 
-# Copy custom configuration
-COPY --chown=nexus:nexus nexus.properties /nexus-data/etc/nexus.properties
-COPY --chown=nexus:nexus scripts/ /opt/sonatype/nexus/scripts/
-
-# Set JVM options for production
-ENV INSTALL4J_ADD_VM_PARAMS="-Xms2g -Xmx2g -XX:MaxDirectMemorySize=3g -XX:+UseG1GC -XX:+UseContainerSupport"
-
 # Configure Nexus properties
 ENV NEXUS_SECURITY_RANDOMPASSWORD=false
 
@@ -31,4 +24,3 @@ EXPOSE 8081
 # Volume for data persistence
 VOLUME ["/nexus-data"]
 
-# Use default entrypoint from base image
