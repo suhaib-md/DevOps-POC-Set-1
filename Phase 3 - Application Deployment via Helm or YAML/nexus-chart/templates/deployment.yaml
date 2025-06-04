@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "nexus-chart.fullname" . }}
+  labels:
+    {{- include "nexus-chart.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "nexus-chart.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "nexus-chart.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "nexus-chart.fullname" . }}-sa
+      {{- end }}
+      securityContext:
+        runAsUser: {{ .Values.nexus.securityContext.runAsUser }}
+        runAsGroup: {{ .Values.nexus.securityContext.runAsGroup }}
+        fsGroup: {{ .Values.nexus.securityContext.fsGroup }}
+      containers:
+      - name: nexus
+        image: "{{ .Values.nexus.image.repository }}:{{ .Values.nexus.image.tag }}"
+        imagePullPolicy: {{ .Values.nexus.image.pullPolicy }}
+        # Fixed startup command with proper nexus-args
+        command: ["/opt/sonatype/nexus/bin/nexus"]
+        args: ["run"]
+        env:
+        # Environment variables from values.yaml
+        {{- range .Values.nexus.env }}
+        - name: {{ .name }}
+          value: {{ .value | quote }}
+        {{- end }}
+        # CRITICAL: Set context path environment variable
+        - name: NEXUS_CONTEXT_PATH
+          value: {{ .Values.nexus.contextPath | default "/" | quote }}
+        # Critical: Set NEXUS_ARGS environment variable
+        - name: NEXUS_ARGS
+          value: "${jetty.etc}/jetty.xml,${jetty.etc}/jetty-http.xml,${jetty.etc}/jetty-requestlog.xml"
+        - name: NEXUS_DATA
+          value: "/nexus-data"
+        - name: NEXUS_HOME
+          value: "/opt/sonatype/nexus"
+        ports:
+        - containerPort: {{ .Values.nexus.service.targetPort }}
+          name: http
+        volumeMounts:
+        - name: nexus-data
+          mountPath: /nexus-data
+        - name: nexus-config
+          mountPath: /opt/sonatype/nexus/etc/nexus.properties
+          subPath: nexus.properties
+        {{- if .Values.database.external.enabled }}
+        - name: nexus-config
+          mountPath: /opt/sonatype/nexus/etc/fabric/nexus-store.properties
+          subPath: database.properties
+        {{- end }}
+        livenessProbe:
+          httpGet:
+            path: {{ if ne (.Values.nexus.contextPath | default "/") "/" }}{{ .Values.nexus.contextPath }}{{ end }}/service/rest/v1/status
+            port: http
+          initialDelaySeconds: 300
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 6
+        readinessProbe:
+          httpGet:
+            path: {{ if ne (.Values.nexus.contextPath | default "/") "/" }}{{ .Values.nexus.contextPath }}{{ end }}/service/rest/v1/status
+            port: http
+          initialDelaySeconds: 180
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        resources:
+          {{- toYaml .Values.nexus.resources | nindent 10 }}
+      volumes:
+      - name: nexus-config
+        configMap:
+          name: {{ include "nexus-chart.fullname" . }}-config
+          items:
+          - key: nexus.properties
+            path: nexus.properties
+          {{- if .Values.database.external.enabled }}
+          - key: database.properties
+            path: database.properties
+          {{- end }}
+      {{- if .Values.nexus.persistence.enabled }}
+      - name: nexus-data
+        persistentVolumeClaim:
+          claimName: {{ include "nexus-chart.fullname" . }}-pvc
+      {{- else }}
+      - name: nexus-data
+        emptyDir: {}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,50 @@
+# templates/pvc.yaml
+{{- if .Values.sonarqube.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-sonarqube-data-pvc
+  namespace: {{ .Values.sonarqube.namespace }}
+  labels:
+    app.kubernetes.io/name: sonarqube
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.sonarqube.persistence.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.sonarqube.persistence.dataSize }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-sonarqube-logs-pvc
+  namespace: {{ .Values.sonarqube.namespace }}
+  labels:
+    app.kubernetes.io/name: sonarqube
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.sonarqube.persistence.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.sonarqube.persistence.logsSize }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-sonarqube-extensions-pvc
+  namespace: {{ .Values.sonarqube.namespace }}
+  labels:
+    app.kubernetes.io/name: sonarqube
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.sonarqube.persistence.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.sonarqube.persistence.extensionsSize }}
+{{- end }}

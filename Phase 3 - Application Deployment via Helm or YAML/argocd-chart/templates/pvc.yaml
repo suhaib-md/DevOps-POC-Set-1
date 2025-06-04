@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-argocd-pvc
+  namespace: {{ .Values.argocd.namespace }}
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: {{ .Values.argocd.persistence.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.argocd.persistence.size }}

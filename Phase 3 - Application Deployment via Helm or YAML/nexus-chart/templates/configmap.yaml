@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "nexus-chart.fullname" . }}-config
+  labels:
+    {{- include "nexus-chart.labels" . | nindent 4 }}
+data:
+  nexus.properties: |
+    # Nexus configuration
+    {{- $randomPassword := "false" }}
+    {{- range .Values.nexus.env }}
+    {{- if eq .name "NEXUS_SECURITY_RANDOMPASSWORD" }}
+    {{- $randomPassword = .value }}
+    {{- end }}
+    {{- end }}
+    nexus.security.randompassword={{ $randomPassword }}
+    nexus.cleanup.retainDays=30
+    nexus.scripts.allowCreation=true
+    
+    # Context path configuration - CRITICAL FIX
+    nexus-context-path={{ .Values.nexus.contextPath | default "/" }}
+    
+    # Application port
+    application-port={{ .Values.nexus.service.targetPort | default 8081 }}
+    
+    # Essential nexus-args configuration
+    nexus-args=${jetty.etc}/jetty.xml,${jetty.etc}/jetty-http.xml,${jetty.etc}/jetty-requestlog.xml
+
+  {{- if .Values.database.external.enabled }}
+  database.properties: |
+    nexus.datastore.enabled=true
+    nexus.datastore.nexus.type=jdbc
+    nexus.datastore.nexus.jdbcUrl=jdbc:postgresql://{{ .Values.database.external.host }}:{{ .Values.database.external.port }}/{{ .Values.database.external.name }}
+    nexus.datastore.nexus.username={{ .Values.database.external.username }}
+    nexus.datastore.nexus.password={{ .Values.database.external.password }}
+  {{- end }}

@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "jenkins-chart.fullname" . }}
+  labels:
+    {{- include "jenkins-chart.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "jenkins-chart.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "jenkins-chart.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "jenkins-chart.fullname" . }}-sa
+      securityContext:
+        {{- toYaml .Values.jenkins.securityContext | nindent 8 }}
+      containers:
+      - name: jenkins
+        image: "{{ .Values.jenkins.image.repository }}:{{ .Values.jenkins.image.tag }}"
+        imagePullPolicy: {{ .Values.jenkins.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        - name: jnlp
+          containerPort: 50000
+          protocol: TCP
+        env:
+        - name: JENKINS_ADMIN_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "jenkins-chart.fullname" . }}-secret
+              key: jenkins-admin-user
+        - name: JENKINS_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "jenkins-chart.fullname" . }}-secret
+              key: jenkins-admin-password
+        - name: CASC_JENKINS_CONFIG
+          value: "/var/jenkins_home/casc_configs/jenkins.yaml"
+        - name: JAVA_OPTS
+          value: >
+            -Djenkins.install.runSetupWizard=false
+            -Djava.awt.headless=true
+            -Dhudson.security.csrf.DefaultCrumbIssuer.EXCLUDE_SESSION_ID=true
+        volumeMounts:
+        - name: jenkins-home
+          mountPath: /var/jenkins_home
+        {{- if .Values.jenkins.jcasc.enabled }}
+        - name: jenkins-config
+          mountPath: /var/jenkins_home/casc_configs
+        {{- end }}
+        - name: jenkins-plugins
+          mountPath: /usr/share/jenkins/ref/plugins.txt
+          subPath: plugins.txt
+        resources:
+          {{- toYaml .Values.jenkins.resources | nindent 10 }}
+        livenessProbe:
+          httpGet:
+            path: /login
+            port: http
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /login
+            port: http
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+      volumes:
+      - name: jenkins-home
+        {{- if .Values.jenkins.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ include "jenkins-chart.fullname" . }}-pvc
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+      {{- if .Values.jenkins.jcasc.enabled }}
+      - name: jenkins-config
+        configMap:
+          name: {{ include "jenkins-chart.fullname" . }}-config
+          items:
+          - key: jenkins.yaml
+            path: jenkins.yaml
+      {{- end }}
+      - name: jenkins-plugins
+        configMap:
+          name: {{ include "jenkins-chart.fullname" . }}-config
+          items:
+          - key: plugins.txt
+            path: plugins.txt
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,68 @@
+sonarqube:
+  namespace: sonarqube
+  image:
+    repository: sonarqube
+    tag: "10.3.0-community"
+    pullPolicy: IfNotPresent
+
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "500m"
+    limits:
+      memory: "4Gi"
+      cpu: "2000m"
+
+  server:
+    replicas: 1
+    port: 9000
+    jvmOpts: "-Xmx2g -Xms512m"
+
+  ingress:
+    enabled: true
+    hostname: sonarqube.yourdomain.com
+    tls:
+      enabled: true
+      secretName: sonarqube-tls
+
+  persistence:
+    enabled: true
+    storageClass: standard
+    size: 20Gi
+    dataSize: 10Gi
+    logsSize: 5Gi
+    extensionsSize: 5Gi
+
+  admin:
+    username: "admin"
+    password: "admin123"  # Change in production
+
+  database:
+    # Set to true to use external database
+    external: false
+    # External DB settings (when external: true)
+    host: ""
+    port: 5432
+    name: "sonarqube"
+    username: "sonarqube"
+    password: "sonarqube123"
+    # Internal PostgreSQL settings (when external: false)
+    postgresql:
+      enabled: true
+      image:
+        repository: postgres
+        tag: "13"
+      storage: 10Gi
+      username: "sonarqube"
+      password: "sonarqube123"
+      database: "sonarqube"
+
+  config:
+    sonarWebContext: "/"
+    sonarJdbcMaxActive: 60
+    sonarJdbcMaxIdle: 5
+    sonarJdbcMinIdle: 2
+    sonarJdbcMaxWait: 5000
+
+  rbac:
+    enabled: true

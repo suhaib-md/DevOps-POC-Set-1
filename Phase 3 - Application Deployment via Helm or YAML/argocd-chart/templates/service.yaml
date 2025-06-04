@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-argocd-server
+  namespace: {{ .Values.argocd.namespace }}
+spec:
+  selector:
+    app: argocd-server
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  type: ClusterIP

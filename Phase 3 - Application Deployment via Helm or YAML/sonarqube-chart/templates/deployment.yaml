@@ -1,0 +1,98 @@
+# templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-sonarqube
+  namespace: {{ .Values.sonarqube.namespace }}
+  labels:
+    app.kubernetes.io/name: sonarqube
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.sonarqube.server.replicas }}
+  selector:
+    matchLabels:
+      app: sonarqube
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: sonarqube
+        release: {{ .Release.Name }}
+    spec:
+      {{- if .Values.sonarqube.rbac.enabled }}
+      serviceAccountName: {{ .Release.Name }}-sonarqube-sa
+      {{- end }}
+      initContainers:
+      - name: init-sysctl
+        image: busybox:1.35
+        command:
+        - sh
+        - -c
+        - |
+          sysctl -w vm.max_map_count=524288
+          sysctl -w fs.file-max=131072
+        securityContext:
+          privileged: true
+      containers:
+      - name: sonarqube
+        image: "{{ .Values.sonarqube.image.repository }}:{{ .Values.sonarqube.image.tag }}"
+        imagePullPolicy: {{ .Values.sonarqube.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.sonarqube.server.port }}
+          name: http
+        env:
+        - name: SONAR_JDBC_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-sonarqube-secret
+              key: db-username
+        - name: SONAR_JDBC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-sonarqube-secret
+              key: db-password
+        - name: SONAR_WEB_JAVAADDITIONALOPTS
+          value: "{{ .Values.sonarqube.server.jvmOpts }}"
+        volumeMounts:
+        - name: sonarqube-config
+          mountPath: /opt/sonarqube/conf/sonar.properties
+          subPath: sonar.properties
+        {{- if .Values.sonarqube.persistence.enabled }}
+        - name: sonarqube-data
+          mountPath: /opt/sonarqube/data
+        - name: sonarqube-logs
+          mountPath: /opt/sonarqube/logs
+        - name: sonarqube-extensions
+          mountPath: /opt/sonarqube/extensions
+        {{- end }}
+        resources:
+          {{- toYaml .Values.sonarqube.resources | nindent 10 }}
+        livenessProbe:
+          httpGet:
+            path: /api/system/status
+            port: {{ .Values.sonarqube.server.port }}
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/system/status
+            port: {{ .Values.sonarqube.server.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+      volumes:
+      - name: sonarqube-config
+        configMap:
+          name: {{ .Release.Name }}-sonarqube-config
+      {{- if .Values.sonarqube.persistence.enabled }}
+      - name: sonarqube-data
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-sonarqube-data-pvc
+      - name: sonarqube-logs
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-sonarqube-logs-pvc
+      - name: sonarqube-extensions
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-sonarqube-extensions-pvc
+      {{- end }}

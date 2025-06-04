@@ -1,0 +1,25 @@
+# templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-sonarqube-config
+  namespace: {{ .Values.sonarqube.namespace }}
+  labels:
+    app.kubernetes.io/name: sonarqube
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: configmap
+data:
+  sonar.properties: |
+    sonar.web.context={{ .Values.sonarqube.config.sonarWebContext }}
+    sonar.jdbc.maxActive={{ .Values.sonarqube.config.sonarJdbcMaxActive }}
+    sonar.jdbc.maxIdle={{ .Values.sonarqube.config.sonarJdbcMaxIdle }}
+    sonar.jdbc.minIdle={{ .Values.sonarqube.config.sonarJdbcMinIdle }}
+    sonar.jdbc.maxWait={{ .Values.sonarqube.config.sonarJdbcMaxWait }}
+    {{- if .Values.sonarqube.database.external }}
+    sonar.jdbc.url=jdbc:postgresql://{{ .Values.sonarqube.database.host }}:{{ .Values.sonarqube.database.port }}/{{ .Values.sonarqube.database.name }}
+    {{- else }}
+    sonar.jdbc.url=jdbc:postgresql://{{ .Release.Name }}-postgresql:5432/{{ .Values.sonarqube.database.postgresql.database }}
+    {{- end }}
+    sonar.path.data=/opt/sonarqube/data
+    sonar.path.logs=/opt/sonarqube/logs
+    sonar.path.temp=/opt/sonarqube/temp

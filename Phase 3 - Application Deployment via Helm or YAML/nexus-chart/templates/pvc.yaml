@@ -1,0 +1,17 @@
+{{- if .Values.nexus.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "nexus-chart.fullname" . }}-pvc
+  labels:
+    {{- include "nexus-chart.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - {{ .Values.nexus.persistence.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.nexus.persistence.size }}
+  {{- if .Values.nexus.persistence.storageClass }}
+  storageClassName: {{ .Values.nexus.persistence.storageClass }}
+  {{- end }}
+{{- end }}

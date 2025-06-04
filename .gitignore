@@ -1,0 +1,15 @@
+# TLS certificates and keys
+*.crt
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Or be more specific
+*-tls.crt
+*-tls.key
+sonarqube-tls.*
+
+# Other common secrets
+*.env
+secrets/

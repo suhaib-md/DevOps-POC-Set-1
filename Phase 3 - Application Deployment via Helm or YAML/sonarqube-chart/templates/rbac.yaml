@@ -1,0 +1,45 @@
+# templates/rbac.yaml
+{{- if .Values.sonarqube.rbac.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Release.Name }}-sonarqube-role
+  labels:
+    app.kubernetes.io/name: sonarqube
+    app.kubernetes.io/instance: {{ .Release.Name }}
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "configmaps", "secrets", "persistentvolumeclaims"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "statefulsets"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
+- apiGroups: ["extensions", "networking.k8s.io"]
+  resources: ["ingresses"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Release.Name }}-sonarqube-binding
+  labels:
+    app.kubernetes.io/name: sonarqube
+    app.kubernetes.io/instance: {{ .Release.Name }}
+subjects:
+- kind: ServiceAccount
+  name: {{ .Release.Name }}-sonarqube-sa
+  namespace: {{ .Values.sonarqube.namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ .Release.Name }}-sonarqube-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Release.Name }}-sonarqube-sa
+  namespace: {{ .Values.sonarqube.namespace }}
+  labels:
+    app.kubernetes.io/name: sonarqube
+    app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

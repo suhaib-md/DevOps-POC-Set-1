@@ -1,0 +1,107 @@
+# values.yaml - Updated configuration
+nexus:
+  image:
+    repository: sonatype/nexus3
+    tag: "3.68.1"  # Updated to secure version
+    pullPolicy: IfNotPresent
+    
+  # Add context path configuration
+  contextPath: "/"
+
+  # Resource configuration
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "1000m"
+    limits:
+      memory: "4Gi"
+      cpu: "2000m"
+
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 8081
+    targetPort: 8081
+    name: nexus-service
+
+  # Persistence configuration
+  persistence:
+    enabled: true
+    storageClass: "standard"
+    size: "20Gi"
+    accessMode: ReadWriteOnce
+
+  # Security context
+  securityContext:
+    runAsUser: 997
+    runAsGroup: 997
+    fsGroup: 997
+
+  # Nexus admin configuration - FIXED
+  admin:
+    username: "admin"
+    randomPassword: true  # Changed to true to generate admin.password file
+
+  # Environment variables - FIXED
+  env:
+    - name: NEXUS_SECURITY_RANDOMPASSWORD
+      value: "true"  # Changed to true
+    - name: NEXUS_JVM_HEAP_MIN
+      value: "1024m"
+    - name: NEXUS_JVM_HEAP_MAX
+      value: "2048m"
+    - name: NEXUS_CONTEXT_PATH
+      value: "/" 
+
+# Database configuration (optional external DB)
+database:
+  external:
+    enabled: false
+    host: ""
+    port: 5432
+    name: "nexus"
+    username: "nexus"
+    password: ""
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+  hosts:
+    - host: nexus.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: nexus-tls
+      hosts:
+        - nexus.local
+
+# Service Account
+serviceAccount:
+  create: true
+  name: "nexus-sa"
+  annotations: {}
+
+# RBAC
+rbac:
+  create: true
+  rules:
+    - apiGroups: [""]
+      resources: ["secrets", "configmaps"]
+      verbs: ["get", "list", "watch"]
+    - apiGroups: [""]
+      resources: ["persistentvolumeclaims"]
+      verbs: ["get", "list", "watch", "create", "update", "patch"]
+
+# Node selector and tolerations
+nodeSelector: {}
+tolerations: []
+affinity: {}

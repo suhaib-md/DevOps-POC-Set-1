@@ -1,0 +1,35 @@
+# templates/ingress.yaml
+{{- if .Values.sonarqube.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-sonarqube-ingress
+  namespace: {{ .Values.sonarqube.namespace }}
+  labels:
+    app.kubernetes.io/name: sonarqube
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: {{ .Values.sonarqube.ingress.hostname }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Release.Name }}-sonarqube-service
+            port:
+              number: 80
+  {{- if .Values.sonarqube.ingress.tls.enabled }}
+  tls:
+  - hosts:
+    - {{ .Values.sonarqube.ingress.hostname }}
+    secretName: {{ .Values.sonarqube.ingress.tls.secretName }}
+  {{- end }}
+{{- end }}

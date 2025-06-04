@@ -1,0 +1,17 @@
+{{- if .Values.jenkins.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "jenkins-chart.fullname" . }}-pvc
+  labels:
+    {{- include "jenkins-chart.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - {{ .Values.jenkins.persistence.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.jenkins.persistence.size }}
+  {{- if .Values.jenkins.persistence.storageClass }}
+  storageClassName: {{ .Values.jenkins.persistence.storageClass }}
+  {{- end }}
+{{- end }}

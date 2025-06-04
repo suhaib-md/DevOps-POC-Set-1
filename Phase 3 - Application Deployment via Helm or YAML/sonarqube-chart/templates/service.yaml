@@ -1,0 +1,19 @@
+# templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-sonarqube-service
+  namespace: {{ .Values.sonarqube.namespace }}
+  labels:
+    app.kubernetes.io/name: sonarqube
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  selector:
+    app: sonarqube
+    release: {{ .Release.Name }}
+  ports:
+  - port: 80
+    targetPort: {{ .Values.sonarqube.server.port }}
+    protocol: TCP
+    name: http
+  type: ClusterIP

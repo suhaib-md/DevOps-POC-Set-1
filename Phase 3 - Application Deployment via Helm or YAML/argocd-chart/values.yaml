@@ -1,0 +1,33 @@
+argocd:
+  namespace: argocd
+  image:
+    repository: quay.io/argoproj/argocd
+    tag: v2.12.4
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "2000m"
+  server:
+    replicas: 1
+    extraArgs: []
+  ingress:
+    enabled: true
+    hostname: argocd.yourdomain.com
+    tls:
+      enabled: true
+      secretName: argocd-tls
+  persistence:
+    enabled: true
+    storageClass: standard
+    size: 8Gi
+  admin:
+    password: "admin123"  # Change in production
+  rbac:
+    enabled: true
+  config:
+    applicationNamespaces: "*"
+    url: "https://argocd.yourdomain.com"

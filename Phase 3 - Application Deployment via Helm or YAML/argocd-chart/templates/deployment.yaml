@@ -1,0 +1,60 @@
+# templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-argocd-server
+  namespace: {{ .Values.argocd.namespace }}
+  labels:
+    app: argocd-server
+spec:
+  replicas: {{ .Values.argocd.server.replicas }}
+  selector:
+    matchLabels:
+      app: argocd-server
+  template:
+    metadata:
+      labels:
+        app: argocd-server
+    spec:
+      serviceAccountName: {{ .Release.Name }}-argocd-sa
+      containers:
+      - name: argocd-server
+        image: {{ .Values.argocd.image.repository }}:{{ .Values.argocd.image.tag }}
+        imagePullPolicy: {{ .Values.argocd.image.pullPolicy }}
+        command: ["/usr/local/bin/argocd-server"]
+        args:
+        - --insecure
+        - --loglevel
+        - info
+        {{- range .Values.argocd.server.extraArgs }}
+        - {{ . }}
+        {{- end }}
+        env:
+        - name: ARGOCD_SERVER_INSECURE
+          value: "true"
+        ports:
+        - name: server
+          containerPort: 8080
+          protocol: TCP
+        - name: grpc
+          containerPort: 8081
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /healthz?full=true
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        resources:
+          requests:
+            memory: {{ .Values.argocd.resources.requests.memory }}
+            cpu: {{ .Values.argocd.resources.requests.cpu }}
+          limits:
+            memory: {{ .Values.argocd.resources.limits.memory }}
+            cpu: {{ .Values.argocd.resources.limits.cpu }}

@@ -1,0 +1,153 @@
+# values.yaml
+jenkins:
+  image:
+    repository: jenkins/jenkins
+    tag: "2.426.1-lts"
+    pullPolicy: IfNotPresent
+
+  # Resource configuration
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "2000m"
+
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+    name: jenkins-service
+
+  # Persistence configuration
+  persistence:
+    enabled: true
+    storageClass: "standard"
+    size: "10Gi"
+    accessMode: ReadWriteOnce
+
+  # Security context
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+
+  # Jenkins admin configuration
+  admin:
+    username: "admin"
+    password: "admin123"
+
+  # Plugin installation
+  installPlugins:
+    - kubernetes:3937.vd7b_82db_e347b_
+    - workflow-aggregator:2.6
+    - git:4.8.3
+    - configuration-as-code:1569.vb_72405b_80249
+    - blueocean:1.25.2
+    - pipeline-stage-view:2.25
+    - docker-workflow:1.29
+    - github-branch-source:2.11.4
+    - pipeline-github-lib:1.0
+    - ssh-slaves:1.806.vfa_3553de8f85
+    - build-timeout:1.27
+    - credentials-binding:523.vd859a_4b_122e6
+    - timestamper:1.17
+    - ws-cleanup:0.45
+    - ant:475.vf34069fef73c
+    - gradle:1.39.4
+    - workflow-support:839.v35e2736cfd5c
+    - pipeline-milestone-step:101.vd572fef9d926
+    - matrix-project:785.v06b_7f47b_c631
+    - build-pipeline-plugin:1.5.8
+    - conditional-buildstep:1.4.2
+    - jenkins-multijob-plugin:1.36
+    - parameterized-trigger:2.45
+    - dashboard-view:2.18.1
+
+  # JCasC configuration
+  jcasc:
+    enabled: true
+    configScripts:
+      welcome-message: |
+        jenkins:
+          systemMessage: "Welcome to Jenkins - Deployed via Helm!"
+      security-realm: |
+        jenkins:
+          securityRealm:
+            local:
+              allowsSignup: false
+              users:
+                - id: "${JENKINS_ADMIN_USERNAME}"
+                  password: "${JENKINS_ADMIN_PASSWORD}"
+      authorization-strategy: |
+        jenkins:
+          authorizationStrategy:
+            loggedInUsersCanDoAnything:
+              allowAnonymousRead: false
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+  hosts:
+    - host: jenkins.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: jenkins-tls
+      hosts:
+        - jenkins.local
+
+# Service Account
+serviceAccount:
+  create: true
+  name: "jenkins-sa"
+  annotations: {}
+
+# RBAC
+rbac:
+  create: true
+  rules:
+    - apiGroups: [""]
+      resources: ["pods", "pods/exec", "pods/log"]
+      verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+    - apiGroups: [""]
+      resources: ["secrets", "configmaps"]
+      verbs: ["get", "list", "watch"]
+
+# Database configuration (if external DB needed)
+database:
+  external:
+    enabled: false
+    host: ""
+    port: 5432
+    name: "jenkins"
+    username: "jenkins"
+    password: ""
+    existingSecret: ""
+
+# Backup configuration
+backup:
+  enabled: false
+  schedule: "0 2 * * *"
+  retention: "30d"
+
+# Monitoring
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: false
+    interval: "30s"
+    path: "/prometheus"
+
+# Node selector and tolerations
+nodeSelector: {}
+tolerations: []
+affinity: {}

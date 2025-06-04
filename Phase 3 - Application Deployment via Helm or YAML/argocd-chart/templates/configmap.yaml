@@ -1,0 +1,13 @@
+# templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  namespace: {{ .Values.argocd.namespace }}
+  labels:
+    app.kubernetes.io/name: argocd-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  application.instanceLabelKey: argocd.argoproj.io/instance
+  url: {{ .Values.argocd.config.url | quote }}
+  application.namespaces: {{ .Values.argocd.config.applicationNamespaces | quote }}
