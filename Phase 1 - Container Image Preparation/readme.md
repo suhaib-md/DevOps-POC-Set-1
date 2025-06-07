@@ -243,10 +243,10 @@ export RESOURCE_GROUP="acr"
    docker push $ACR_LOGIN_SERVER/sonarqube-custom:latest
    ```
 
-![alt text](<Screenshot 2025-06-02 124843.png>)
-![alt text](<Screenshot 2025-06-02 130123.png>)
-![alt text](<Screenshot 2025-06-02 131206.png>)
-![alt text](<Screenshot 2025-06-02 131228.png>)
+![alt text](<screenshots/Screenshot 2025-06-02 124843.png>)
+![alt text](<screenshots/Screenshot 2025-06-02 130123.png>)
+![alt text](<screenshots/Screenshot 2025-06-02 131206.png>)
+![alt text](<screenshots/Screenshot 2025-06-02 131228.png>)
 
 ## Verification
 
@@ -257,7 +257,7 @@ export RESOURCE_GROUP="acr"
    az acr repository list --name $ACR_NAME --output table
    ```
 
-![alt text](<Screenshot 2025-06-02 131300.png>)
+![alt text](<screenshots/Screenshot 2025-06-02 131300.png>)
 
 2. **Check image tags:**
    ```bash
@@ -266,7 +266,7 @@ export RESOURCE_GROUP="acr"
    az acr repository show-tags --name $ACR_NAME --repository sonarqube-custom --output table
    ```
 
-![alt text](<Screenshot 2025-06-02 131410.png>)
+![alt text](<screenshots/Screenshot 2025-06-02 131410.png>)
 
 ## Security Considerations
 

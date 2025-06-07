@@ -93,12 +93,12 @@ terraform plan -out=tfplan
 # Apply configuration
 terraform apply tfplan
 ```
-![alt text](image.png)
-![alt text](image-1.png)
-![alt text](<Screenshot 2025-06-02 212408.png>)
-![alt text](<Screenshot 2025-06-02 212423.png>)
-![alt text](<Screenshot 2025-06-02 212446.png>)
-![alt text](<Screenshot 2025-06-03 142759.png>)
+![alt text](screenshots/image.png)
+![alt text](screenshots/image-1.png)
+![alt text](<screenshots/Screenshot 2025-06-02 212408.png>)
+![alt text](<screenshots/Screenshot 2025-06-02 212423.png>)
+![alt text](<screenshots/Screenshot 2025-06-02 212446.png>)
+![alt text](<screenshots/Screenshot 2025-06-03 142759.png>)
 ## 📁 Project Structure
 
 ```
@@ -416,11 +416,11 @@ kubectl get nodes -o custom-columns=NAME:.metadata.name,ZONE:.metadata.labels.to
 kubectl get pods --all-namespaces
 kubectl cluster-info
 ```
-![alt text](<Screenshot 2025-06-03 142837.png>)
-![alt text](<Screenshot 2025-06-03 142855.png>)
-![alt text](<Screenshot 2025-06-03 142912.png>)
-![alt text](<Screenshot 2025-06-03 144042.png>)
-![alt text](<Screenshot 2025-06-03 151847.png>)
+![alt text](<screenshots/Screenshot 2025-06-03 142837.png>)
+![alt text](<screenshots/Screenshot 2025-06-03 142855.png>)
+![alt text](<screenshots/Screenshot 2025-06-03 142912.png>)
+![alt text](<screenshots/Screenshot 2025-06-03 144042.png>)
+![alt text](<screenshots/Screenshot 2025-06-03 151847.png>)
 
 ### Application Gateway Verification
 
@@ -431,7 +431,7 @@ az network public-ip show \
   --name aks-app-gateway-ip \
   --query ipAddress -o tsv
 ```
-![alt text](<Screenshot 2025-06-03 151915.png>)
+![alt text](<screenshots/Screenshot 2025-06-03 151915.png>)
 ### VMSS Verification
 
 ```bash
@@ -444,8 +444,8 @@ az vmss list-instances \
   --name aks-vmss \
   --output table
 ```
-![alt text](image-3.png)
-![alt text](image-4.png)
+![alt text](screenshots/image-3.png)
+![alt text](screenshots/image-4.png)
 ## 🛠️ Troubleshooting
 
 ### Common Issues
