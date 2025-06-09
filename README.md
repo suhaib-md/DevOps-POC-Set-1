@@ -170,7 +170,8 @@ packer build windows-10/windows.pkr.hcl
 **Quick Commands**:
 ```bash
 cd phase-6-observability/
-python3 jenkins_log_backup.py --job "your-job-name" --days 1```
+python3 jenkins_log_backup.py --job "your-job-name" --days 1
+```
 
 ## 🛠️ Common Operations
 
