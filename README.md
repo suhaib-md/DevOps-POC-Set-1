@@ -33,7 +33,7 @@ This repository contains a comprehensive DevOps Proof of Concept (POC) implement
 
 ## 📁 Project Structure
 
-```
+
 
 ## 🚀 Quick Start Guide
 
