@@ -7,7 +7,7 @@
 
 ## 📋 Project Overview
 
-This repository contains a comprehensive DevOps Proof of Concept (POC) implementation that demonstrates enterprise-grade DevOps practices using modern cloud-native technologies. The project is structured in 8 phases, progressing from basic containerization to advanced automation and observability.
+This repository contains a comprehensive DevOps Proof of Concept (POC) implementation that demonstrates enterprise-grade DevOps practices using modern cloud-native technologies. The project is structured in 6 phases, progressing from basic containerization to advanced automation and observability.
 
 ## 🏗️ Architecture Overview
 
@@ -33,7 +33,7 @@ This repository contains a comprehensive DevOps Proof of Concept (POC) implement
 
 ## 📁 Project Structure
 
-```
+
 
 ## 🚀 Quick Start Guide
 
@@ -170,7 +170,8 @@ packer build windows-10/windows.pkr.hcl
 **Quick Commands**:
 ```bash
 cd phase-6-observability/
-python3 jenkins_log_backup.py --job "your-job-name" --days 1```
+python3 jenkins_log_backup.py --job "your-job-name" --days 1
+```
 
 ## 🛠️ Common Operations
 
